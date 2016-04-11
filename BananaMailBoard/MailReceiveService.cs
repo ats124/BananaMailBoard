@@ -77,7 +77,7 @@ namespace BananaMailBoard
             var useSsl = pref.GetBoolean("mail_pop3_usessl", false);
             var strPort = pref.GetString("mail_pop3_port", "");
             int port;
-            if (string.IsNullOrWhiteSpace(strPort) || int.TryParse(strPort, out port))
+            if (string.IsNullOrWhiteSpace(strPort) || !int.TryParse(strPort, out port))
             {
                 port = useSsl ? 995 : 110;
             }
