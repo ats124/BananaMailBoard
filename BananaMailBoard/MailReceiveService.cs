@@ -70,7 +70,7 @@ namespace BananaMailBoard
 
         private string GetMessage(string lastMessageUid, out MimeMessage message)
         {
-            var pref = PreferenceManager.GetDefaultSharedPreferences(this.ApplicationContext);
+            var pref = PreferenceManager.GetDefaultSharedPreferences(this);
             var mailAddress = pref.GetString("mail_address", "");
             var mailPassword = pref.GetString("mail_password", "");
             var serverAddress = pref.GetString("mail_pop3_server", "");

@@ -61,7 +61,7 @@ namespace BananaMailBoard
         public override void OnResume()
         {
             base.OnResume();
-            var pm = (PowerManager)Activity.ApplicationContext.GetSystemService(Android.Content.Context.PowerService);
+            var pm = (PowerManager)Activity.GetSystemService(Android.Content.Context.PowerService);
             wakeLock = pm.NewWakeLock(WakeLockFlags.Full | WakeLockFlags.AcquireCausesWakeup | WakeLockFlags.OnAfterRelease, "BananaMailBoard");
             wakeLock.Acquire();
             if (!soundStop)
@@ -84,7 +84,7 @@ namespace BananaMailBoard
         private void PlayMessageAlertTone()
         {
             spMessageAlertTone = new SoundPool(1, Stream.Music, 0);
-            soundId = spMessageAlertTone.Load(this.Activity.ApplicationContext, Resource.Raw.sound, 1);
+            soundId = spMessageAlertTone.Load(this.Activity, Resource.Raw.sound, 1);
             spMessageAlertTone.LoadComplete += (sender, e) =>
             {
                 if (spMessageAlertTone != null) spMessageAlertTone.Play(soundId, 1, 1, 1, -1, 1);
@@ -104,13 +104,34 @@ namespace BananaMailBoard
 
         private async void Button_Click(object sender, EventArgs e)
         {
+            // 返信中プログレスダイアログ表示
             var progressDialog = new ProgressDialog(Activity);
             progressDialog.SetTitle("返信中");
             progressDialog.SetCancelable(false);
             progressDialog.SetProgressStyle(ProgressDialogStyle.Spinner);
             progressDialog.Show();
 
-            var pref = PreferenceManager.GetDefaultSharedPreferences(this.Activity.ApplicationContext);
+            // 返信
+            var replyResult = await SendReply(((Button)sender).Text);
+
+            // 返信中プログレスダイアログ閉じる
+            progressDialog.Dismiss();
+
+            if (replyResult)
+            {
+                // 返信に成功した場合は待受け画面へ遷移
+                this.NavigateFragment(new MailReceiveWaitingFragment());
+            }
+            else
+            {
+
+            }
+        }
+
+        private async Task<bool> SendReply(string replyMessage)
+        {
+            // メール設定取得
+            var pref = PreferenceManager.GetDefaultSharedPreferences(this.Activity);
             var mailAddress = pref.GetString("mail_address", "");
             var mailPassword = pref.GetString("mail_password", "");
             var smtpServerAddress = pref.GetString("mail_smtp_server", "");
@@ -126,40 +147,19 @@ namespace BananaMailBoard
             var replyAddress = Arguments.GetString(Constants.BUNDLE_MAIL_FROM_ADDRESS);
             var mailSubject = Arguments.GetString(Constants.BUNDLE_MAIL_SUBJECT);
             var mailBody = Arguments.GetString(Constants.BUNDLE_MAIL_BODY);
-            var replyButtonText = ((Button)sender).Text;
-            bool replySucceeded = false;
 
-            await Task.Run(() =>
+            return await Task.Run(() =>
             {
                 try
                 {
-                    //var message = new MimeMessage();
-                    //message.From.Add(new MailboxAddress(null, mailAddress));
-                    //message.To.Add(new MailboxAddress(null, replyAddress));
-                    //message.Subject = "Re:" + mailSubject;
-                    //message.Body = new TextPart("plain")
-                    //{
-                    //    Text = $"返信「{replyButtonText}」が\r\n" +
-                    //        Regex.Replace(mailBody, "^", "> ", RegexOptions.Multiline)
-                    //};
-
-                    //using (var smtpClient = new SmtpClient())
-                    //{
-                    //    smtpClient.Connect(smtpServerAddress, smtpPort, smtpUseSsl);
-                    //    if (smtpUseAuth)
-                    //    {
-                    //        smtpClient.Authenticate(mailAddress, mailPassword);
-                    //    }
-                    //    smtpClient.Send(message);
-                    //}
                     var fromAddress = new MailAddress(mailAddress);
                     var toAddress = new MailAddress(replyAddress);
                     using (var message = new MailMessage(fromAddress, toAddress))
                     {
                         message.Subject = "Re:" + mailSubject;
                         message.SubjectEncoding = System.Text.Encoding.UTF8;
-                        message.Body = 
-                            $"「{replyButtonText}」ボタンによりが返信されました。\r\n" +
+                        message.Body =
+                            $"「{replyMessage}」ボタンによりが返信されました。\r\n\r\n" +
                             Regex.Replace(mailBody, "^", "> ", RegexOptions.Multiline);
                         message.BodyEncoding = System.Text.Encoding.UTF8;
                         using (var smtpClient = new SmtpClient())
@@ -178,23 +178,14 @@ namespace BananaMailBoard
                             smtpClient.Send(message);
                         }
                     }
-                    replySucceeded = true;
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     Log.Error(Constants.LOG_TAG, "返信エラー" + ex.ToString());
                 }
+                return false;
             });
-            progressDialog.Dismiss();
-
-            if (replySucceeded)
-            {
-                this.NavigateFragment(new MailReceiveWaitingFragment());
-            }
-            else
-            {
-
-            }
         }
     }
 }

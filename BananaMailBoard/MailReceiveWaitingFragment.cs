@@ -24,7 +24,7 @@ namespace BananaMailBoard
         public override void OnStart()
         {
             base.OnStart();
-            this.Activity.StartService(new Intent(this.Activity.ApplicationContext, typeof(MailReceiveService)));
+            this.Activity.StartService(new Intent(this.Activity, typeof(MailReceiveService)));
         }
 
         protected override void OnResume(Intent[] intents)
