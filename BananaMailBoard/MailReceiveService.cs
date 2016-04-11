@@ -25,7 +25,7 @@ namespace BananaMailBoard
         /// <summary>
         /// 文末に「」で囲まれた文字列があれば返信ボタンとして認識するための正規表現
         /// </summary>
-        static readonly Regex BUTTONS_REGEX = new Regex(@"((\n|\s)*「(?<button>[^」*])」(\n|\s)*)$");
+        static readonly Regex BUTTONS_REGEX = new Regex(@"((\n|\s)*(「(?<button>.*?)」\s*)*(\n|\s)*)$");
 
         protected override void OnHandleIntent(Intent intent)
         {
@@ -164,7 +164,7 @@ namespace BananaMailBoard
             string[] buttons;
             if (m.Success)
             {
-                buttons = m.Captures.Cast<Capture>().Select(c => c.Value).ToArray();
+                buttons = m.Groups["button"].Captures.Cast<Capture>().Select(c => c.Value).ToArray();
                 // 返信用ボタン文字列を本文から除去
                 textBody = textBody.Substring(0, m.Index - 1);
             }
