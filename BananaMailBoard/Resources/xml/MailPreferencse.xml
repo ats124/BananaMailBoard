@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <EditTextPreference
+          android:key="mail_address"
+          android:title="メールアドレス"
+          android:summary="メールアドレス"/>
+  <EditTextPreference
+            android:key="mail_password"
+            android:title="パスワード"
+            android:summary="パスワード"/>
+  <PreferenceCategory
+      android:title="メール受信設定">
+    <EditTextPreference
+              android:key="mail_pop3_server"
+              android:title="受信サーバー"
+              android:summary="受信サーバ(POP3) アドレス"/>
+    <CheckBoxPreference
+        android:key="mail_pop3_usessl"
+        android:summary="SSLを使用する"
+        android:title="SSL" />
+    <EditTextPreference
+              android:key="mail_pop3_port"
+              android:title="ポート番号" 
+              android:summary="ポート番号" />
+  </PreferenceCategory>
+  <PreferenceCategory
+       android:title="メール送信設定">
+    <EditTextPreference
+              android:key="mail_smtp_server"
+              android:title="送信サーバー" 
+              android:summary="送信サーバ(SMTP) アドレス"/>
+    <CheckBoxPreference
+        android:key="mail_smtp_useauth"
+        android:summary="SMTP認証を使用する"
+        android:title="SMTP認証" />
+    <CheckBoxPreference
+        android:key="mail_smtp_usessl"
+        android:summary="SSLを使用する"
+        android:title="SSL" />
+    <EditTextPreference
+              android:key="mail_smtp_port"
+              android:title="ポート番号" 
+              android:summary="ポート番号"/>
+  </PreferenceCategory>
+</PreferenceScreen>
