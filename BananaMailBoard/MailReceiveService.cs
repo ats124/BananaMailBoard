@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -9,13 +10,18 @@ using Android.Util;
 using Android.Net;
 using Android.Preferences;
 
+using SQLite;
 using MailKit.Net.Pop3;
 using MimeKit;
 
 namespace BananaMailBoard
 {
+    using Entity;
     using Util;
 
+    /// <summary>
+    /// メール受信サービス
+    /// </summary>
     [Service]
     public class MailReceiveService : IntentService
     {
@@ -48,7 +54,7 @@ namespace BananaMailBoard
                     }
                     else
                     {
-                        bundleMessage = CreateBundleMessage(message);
+                        bundleMessage = CreateBundleMessage(messageUid, message);
                     }
 
                     var toIntent = new Intent(BaseContext, typeof(MainActivity));
@@ -56,20 +62,23 @@ namespace BananaMailBoard
                     toIntent.AddFlags(ActivityFlags.SingleTop);
                     toIntent.SetAction(Constants.INTENT_MAIL_RECEIVE_ACTION);
                     toIntent.PutExtras(bundleMessage);
+                    Log.Debug(Constants.LOG_TAG, "MailReceiveService.OnHandleIntent StartActivity Start");
                     StartActivity(toIntent);
+                    Log.Debug(Constants.LOG_TAG, "MailReceiveService.OnHandleIntent StartActivity End");
+
+                    lastMessageUid = messageUid;
+                    lastBundleMessage = bundleMessage;
                 }
                 catch (Exception ex)
                 {
                     Log.Error(Constants.LOG_TAG, ex.ToString());
                 }
             }
-
-            lastMessageUid = messageUid;
-            lastBundleMessage = bundleMessage;
         }
 
         private string GetMessage(string lastMessageUid, out MimeMessage message)
         {
+            // メール設定取得
             var pref = PreferenceManager.GetDefaultSharedPreferences(this);
             var mailAddress = pref.GetString("mail_address", "");
             var mailPassword = pref.GetString("mail_password", "");
@@ -81,11 +90,22 @@ namespace BananaMailBoard
             {
                 port = useSsl ? 995 : 110;
             }
-
+            // メールアドレス、サーバーアドレスの設定がなければ処理中断
             if (string.IsNullOrWhiteSpace(mailAddress) || string.IsNullOrWhiteSpace(serverAddress))
             {
                 message = null;
                 return null;
+            }
+
+            // 返信済みメッセージID一覧取得
+            HashSet<string> repliedMessageIds;
+            lock (Constants.DB_LOCK)
+            {
+                using (var db = new SQLiteConnection(Constants.DB_PATH))
+                {
+                    db.CreateTable<RepliedMessage>();
+                    repliedMessageIds = new HashSet<string>(db.Table<RepliedMessage>().ToList().Select(rec => rec.MessageUid));                    
+                }
             }
 
             var cm = (ConnectivityManager)GetSystemService(Context.ConnectivityService);
@@ -97,21 +117,28 @@ namespace BananaMailBoard
                     {
                         pop3Client.Connect(serverAddress, port, true);
                         pop3Client.Authenticate(mailAddress, mailPassword);
-                        var messageCnt = pop3Client.Count;
-                        if (messageCnt > 0)
+
+                        // メッセージID一覧を取得
+                        var messageUids = pop3Client.GetMessageUids();
+
+                        // メッセージIDの中から返信していない最初のメッセージIDのインデックスを取得
+                        var newMessageInfo = messageUids
+                            .Select((uid, index) => new { uid, index })
+                            .FirstOrDefault(obj => !repliedMessageIds.Contains(obj.uid));
+
+                        if (newMessageInfo != null)
                         {
-                            var messageUid = pop3Client.GetMessageUid(0);
-                            if (messageUid != lastMessageUid)
+                            if (newMessageInfo.uid != lastMessageUid)
                             {
                                 Log.Debug(Constants.LOG_TAG, "New Mail Found");
-                                message = pop3Client.GetMessage(0);
+                                message = pop3Client.GetMessage(newMessageInfo.index);
                             }
                             else
                             {
                                 // 前回と同じUIDの場合メール本文を取得しない
                                 message = null;
                             }
-                            return messageUid;
+                            return newMessageInfo.uid;
                         }
                         else
                         {
@@ -142,7 +169,13 @@ namespace BananaMailBoard
             return null;
         }
 
-        private Bundle CreateBundleMessage(MimeMessage message)
+        /// <summary>
+        /// インテント送信用メッセージバンドルを生成。
+        /// </summary>
+        /// <param name="messageUid">バンドルメッセージ作成元となるメッセージUID。</param>
+        /// <param name="message">バンドルメッセージ作成元となる<see cref="MimeMessage"/></param>
+        /// <returns>引数のmessageをもとに作成したバンドル。</returns>
+        private Bundle CreateBundleMessage(string messageUid, MimeMessage message)
         {
             string textBody;
             if (message.TextBody != null)
@@ -166,7 +199,7 @@ namespace BananaMailBoard
             {
                 buttons = m.Groups["button"].Captures.Cast<Capture>().Select(c => c.Value).ToArray();
                 // 返信用ボタン文字列を本文から除去
-                textBody = textBody.Substring(0, m.Index - 1);
+                textBody = textBody.Substring(0, m.Index);
             }
             else
             {
@@ -174,6 +207,7 @@ namespace BananaMailBoard
             }
 
             var bundleMessage = new Bundle();
+            bundleMessage.PutString(Constants.BUNDLE_MAIL_MESSAGE_UID, messageUid);
             bundleMessage.PutString(Constants.BUNDLE_MAIL_SUBJECT, message.Subject ?? "");
             bundleMessage.PutString(Constants.BUNDLE_MAIL_BODY, textBody);
             bundleMessage.PutString(Constants.BUNDLE_MAIL_FROM_ADDRESS, ((MailboxAddress)message.From[0]).Address);

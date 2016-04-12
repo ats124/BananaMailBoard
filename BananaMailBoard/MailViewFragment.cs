@@ -11,10 +11,13 @@ using Android.Media;
 using Android.Util;
 using Android.App;
 using Android.Preferences;
-using MimeKit;
+
+using SQLite;
 
 namespace BananaMailBoard
 {
+    using Entity;
+
     public class MailViewFragment : BaseFragment
     {
         static MailViewFragment()
@@ -152,11 +155,13 @@ namespace BananaMailBoard
             var replyAddress = Arguments.GetString(Constants.BUNDLE_MAIL_FROM_ADDRESS);
             var mailSubject = Arguments.GetString(Constants.BUNDLE_MAIL_SUBJECT);
             var mailBody = Arguments.GetString(Constants.BUNDLE_MAIL_BODY);
+            var messageUid = Arguments.GetString(Constants.BUNDLE_MAIL_MESSAGE_UID);
 
             return Task.Factory.StartNew(() =>
             {
                 try
                 {
+                    // 返信メール送信
                     var fromAddress = new MailAddress(mailAddress);
                     var toAddress = new MailAddress(replyAddress);
                     using (var message = new MailMessage(fromAddress, toAddress))
@@ -183,6 +188,17 @@ namespace BananaMailBoard
                             smtpClient.Send(message);
                         }
                     }
+
+                    // 送信済みメール
+                    lock (Constants.DB_LOCK)
+                    {
+                        using (var db = new SQLiteConnection(Constants.DB_PATH))
+                        {
+                            db.CreateTable<RepliedMessage>();
+                            db.InsertOrReplace(new RepliedMessage() { MessageUid = messageUid });
+                        }
+                    }
+
                     return true;
                 }
                 catch (Exception ex)

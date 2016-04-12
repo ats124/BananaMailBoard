@@ -42,6 +42,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Interactive, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ix-Main.1.2.5\lib\portable-windows8+net45+wp8\System.Interactive.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
     <Reference Include="BouncyCastle, Version=1.8.1.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
@@ -59,6 +63,7 @@
     <Compile Include="BaseFragment.cs" />
     <Compile Include="BootReceiver.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Entity\RepliedMessage.cs" />
     <Compile Include="IBaseFragment.cs" />
     <Compile Include="MailPreferenceFragment.cs" />
     <Compile Include="MailReceiveService.cs" />
