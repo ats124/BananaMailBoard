@@ -1,18 +1,17 @@
 using System;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Net.Mail;
+using System.Net;
 
 using Android.OS;
 using Android.Views;
 using Android.Widget;
 using Android.Media;
 using Android.Util;
-//using MailKit.Net.Smtp;
 using Android.App;
 using Android.Preferences;
 using MimeKit;
-using System.Net.Mail;
-using System.Net;
 
 namespace BananaMailBoard
 {
@@ -106,7 +105,8 @@ namespace BananaMailBoard
         {
             // 返信中プログレスダイアログ表示
             var progressDialog = new ProgressDialog(Activity);
-            progressDialog.SetTitle("返信中");
+            progressDialog.SetTitle("返信メール送信中");
+            progressDialog.SetMessage("しばらくお待ちください。");
             progressDialog.SetCancelable(false);
             progressDialog.SetProgressStyle(ProgressDialogStyle.Spinner);
             progressDialog.Show();
@@ -124,11 +124,16 @@ namespace BananaMailBoard
             }
             else
             {
-
+                // 返信に失敗した場合はエラーダイアログ表示
+                var alertDlgBuilder = new AlertDialog.Builder(this.Activity);
+                alertDlgBuilder.SetTitle("返信送信エラー");
+                alertDlgBuilder.SetMessage("返信送信中にエラーが発生しました。");
+                alertDlgBuilder.SetPositiveButton("OK", (sender2, e2) => { });
+                alertDlgBuilder.Create().Show();
             }
         }
 
-        private async Task<bool> SendReply(string replyMessage)
+        private Task<bool> SendReply(string replyMessage)
         {
             // メール設定取得
             var pref = PreferenceManager.GetDefaultSharedPreferences(this.Activity);
@@ -139,16 +144,16 @@ namespace BananaMailBoard
             var smtpUseSsl = pref.GetBoolean("mail_smtp_usessl", false);
             var strSmtpPort = pref.GetString("mail_smtp_port", "");
             int smtpPort;
-            if (string.IsNullOrWhiteSpace(strSmtpPort) || int.TryParse(strSmtpPort, out smtpPort))
+            if (string.IsNullOrWhiteSpace(strSmtpPort) || !int.TryParse(strSmtpPort, out smtpPort))
             {
                 smtpPort = smtpUseAuth ? 587 : smtpUseSsl ? 465 : 25;
             }
-
+            // 返信内容取得
             var replyAddress = Arguments.GetString(Constants.BUNDLE_MAIL_FROM_ADDRESS);
             var mailSubject = Arguments.GetString(Constants.BUNDLE_MAIL_SUBJECT);
             var mailBody = Arguments.GetString(Constants.BUNDLE_MAIL_BODY);
 
-            return await Task.Run(() =>
+            return Task.Factory.StartNew(() =>
             {
                 try
                 {
@@ -159,7 +164,7 @@ namespace BananaMailBoard
                         message.Subject = "Re:" + mailSubject;
                         message.SubjectEncoding = System.Text.Encoding.UTF8;
                         message.Body =
-                            $"「{replyMessage}」ボタンによりが返信されました。\r\n\r\n" +
+                            $"「{replyMessage}」ボタンにより返信されました。\r\n\r\n" +
                             Regex.Replace(mailBody, "^", "> ", RegexOptions.Multiline);
                         message.BodyEncoding = System.Text.Encoding.UTF8;
                         using (var smtpClient = new SmtpClient())
