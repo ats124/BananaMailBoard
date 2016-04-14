@@ -13,24 +13,24 @@ using Android.Util;
 
 namespace BananaMailBoard
 {
+    using Util;
+
     [BroadcastReceiver]
-    [IntentFilter(new[] { Android.Content.Intent.ActionBootCompleted })]
+    [IntentFilter(new[] { Android.Content.Intent.ActionBootCompleted }, Categories = new[] { Android.Content.Intent.CategoryDefault })]
     public class BootReceiver : BroadcastReceiver
     {
-        const string TAG = "BananaMailBoard";
-
-        static readonly TimeSpan INTERVAL = TimeSpan.FromMinutes(1);
-
         public override void OnReceive(Context context, Intent intent)
         {
-            Log.Debug(TAG, "BootReceiver.OnReceive");
-
-            var alarmManager = (AlarmManager)context.GetSystemService(Context.AlarmService);
-            alarmManager.SetRepeating(
-                AlarmType.RtcWakeup,
-                SystemClock.ElapsedRealtime() + (long)INTERVAL.TotalMilliseconds, 
-                (long)INTERVAL.TotalMilliseconds, 
-                PendingIntent.GetService(context, 0, new Intent(context, typeof(MailReceiveService)), PendingIntentFlags.CancelCurrent));
+            LogHelper.Debug("START");
+            try
+            {
+                AlarmReceiver.SetDoMailReceiveAlarm(context, false);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error(ex, "SetDoMailReceiveAlarm Error");
+            }
+            LogHelper.Debug("END");
         }
     }
 }

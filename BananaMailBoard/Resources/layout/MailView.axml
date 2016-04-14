@@ -9,14 +9,30 @@
         android:layout_height="wrap_content"
         android:layout_weight="1">
         <TextView
-            android:text="Title"
+            android:text="From"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minWidth="25px"
-            android:id="@+id/txtSubject" />
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:id="@+id/txtFromName" />
         <View
-            android:id="@+id/Separator"
+            android:id="@+id/Separator1"
+            android:layout_width="wrap_content"
+            android:background="#DDFFFFFF"
+            android:layout_height="1dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp" />
+        <TextView
+            android:text="Subject"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtSubject"
+            android:singleLine="true"
+            android:ellipsize="end" />
+        <View
+            android:id="@+id/Separator2"
             android:layout_width="wrap_content"
             android:background="#DDFFFFFF"
             android:layout_height="1dp"
@@ -31,7 +47,6 @@
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minWidth="25px"
                 android:id="@+id/txtBody" />
         </ScrollView>
     </LinearLayout>

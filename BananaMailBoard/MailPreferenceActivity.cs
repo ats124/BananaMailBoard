@@ -7,19 +7,19 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Android.Preferences;
 
 namespace BananaMailBoard
 {
-    public class MailPreferenceFragment : PreferenceFragment
+    [Activity(Label = "MailPreferenceActivity")]
+    public class MailPreferenceActivity : PreferenceActivity
     {
-        public override void OnCreate(Bundle savedInstanceState)
+        protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            AddPreferencesFromResource(Resource.Xml.MailPreferencse);
+            SetContentView(Resource.Layout.MailPreference);
         }
     }
 }
