@@ -30,8 +30,7 @@ namespace BananaMailBoard
         private bool ringing = false;
         private bool flickOn = false;
 
-        private SoundPool spRingingTone = null;
-        private int soundId = 0;
+        private MediaPlayer mpRingingTone = null;
         private Timer flickerTimer = null;
 
         static MailViewActivity()
@@ -81,8 +80,10 @@ namespace BananaMailBoard
             FindViewById<TextView>(Resource.Id.txtBody).Text = intent.GetStringExtra(Constants.BUNDLE_MAIL_BODY);
             // 返信ボタン
             var buttonNames = intent.GetStringArrayExtra(Constants.BUNDLE_MAIL_REPLY_BUTTONS);
-            foreach (var button in buttonNames.DefaultIfEmpty("OK").Select(btnName => new Button(this) { Text = btnName }))
-            {
+            foreach (var button in buttonNames
+                .DefaultIfEmpty("OK")
+                .Select(btnName => new Button(this, null, Resource.Attribute.myButtonStyle) { Text = btnName }))
+            {                
                 button.Click += ReplyButton_Click;
                 buttonsLayout.AddView(button);
             }
@@ -111,6 +112,9 @@ namespace BananaMailBoard
         {
             try
             {
+                // 鳴動停止
+                StopMessageReceiveRinging();
+
                 // 返信中プログレスダイアログ表示
                 var progressDialog = new ProgressDialog(this);
                 progressDialog.SetTitle("返信メール送信中");
@@ -153,14 +157,11 @@ namespace BananaMailBoard
         /// </summary>
         private void StartMessageReciveRinging()
         {
-            if (spRingingTone == null)
+            if (mpRingingTone == null)
             {
-                spRingingTone = new SoundPool(1, Stream.Music, 0);
-                soundId = spRingingTone.Load(this, Resource.Raw.sound, 1);
-                spRingingTone.LoadComplete += (sender, e) =>
-                {
-                    if (spRingingTone != null) spRingingTone.Play(soundId, 1, 1, 1, -1, 1);
-                };
+                mpRingingTone = MediaPlayer.Create(this, Resource.Raw.sound);
+                mpRingingTone.Looping = true;
+                mpRingingTone.Start();
             }
 
             if (flickerTimer == null)
@@ -168,18 +169,8 @@ namespace BananaMailBoard
                 flickerTimer = new Timer(Constants.FLICKER_INTERVAL);
                 flickerTimer.Elapsed += (sender, e) => RunOnUiThread(() =>
                 {
-                    var rootLayout = FindViewById<LinearLayout>(Resource.Id.rootLayout);
                     flickOn = !flickOn;
-                    if (flickOn)
-                    {
-                        rootLayout.SetBackgroundColor(Constants.FLICKER_COLOR);
-                    }
-                    else
-                    {
-                        var attrValue = new Android.Util.TypedValue();
-                        Theme.ResolveAttribute(Android.Resource.Attribute.ColorBackground, attrValue, true);
-                        rootLayout.SetBackgroundColor(Resources.GetColor(attrValue.ResourceId));
-                    }
+                    SetFlickerStyle(flickOn);
                 });
                 flickerTimer.Start();
             }
@@ -190,18 +181,38 @@ namespace BananaMailBoard
         /// </summary>
         private void StopMessageReceiveRinging()
         {
-            if (spRingingTone != null)
+            if (mpRingingTone != null)
             {
-                spRingingTone.Stop(soundId);
-                spRingingTone.Unload(soundId);
-                spRingingTone.Dispose();
-                spRingingTone = null;
+                mpRingingTone.Stop();
+                mpRingingTone.Dispose();
+                mpRingingTone = null;
             }
             if (flickerTimer != null)
             {
                 flickerTimer.Stop();
                 flickerTimer.Dispose();
                 flickerTimer = null;
+                flickOn = false;
+                SetFlickerStyle(false);
+            }
+        }
+
+        /// <summary>
+        /// フリッカスタイルをセットします。
+        /// </summary>
+        /// <param name="onOff"></param>
+        private void SetFlickerStyle(bool onOff)
+        {
+            var rootLayout = FindViewById<LinearLayout>(Resource.Id.rootLayout);
+            if (flickOn)
+            {
+                rootLayout.SetBackgroundColor(Constants.FLICKER_COLOR);
+            }
+            else
+            {
+                var attrValue = new Android.Util.TypedValue();
+                Theme.ResolveAttribute(Android.Resource.Attribute.ColorBackground, attrValue, true);
+                rootLayout.SetBackgroundColor(Resources.GetColor(attrValue.ResourceId));
             }
         }
 

@@ -3,7 +3,11 @@
   <style name="MyTextStyle">
     <item name="android:textSize">40sp</item>
   </style>
-  <style name="MyButtonStyle">
+  <style name="MyButtonStyle" parent="android:style/Widget.Button">
     <item name="android:textSize">40sp</item>
+  </style>
+  <attr name="myButtonStyle" format="integer|reference" />
+  <style name="MyApplicationStyle" parent="android:Theme">
+    <item name="myButtonStyle">@style/MyButtonStyle</item>
   </style>
 </resources>

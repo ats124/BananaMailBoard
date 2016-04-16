@@ -23,18 +23,15 @@
                 <TextView
                     style="@style/MyTextStyle"
                     android:text="差出人"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
                     android:layout_width="120sp"
                     android:layout_height="wrap_content" />
                 <TextView
                     style="@style/MyTextStyle"
                     android:text=" : "
-                    android:textAppearance="?android:attr/textAppearanceLarge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <TextView
                     style="@style/MyTextStyle"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -56,19 +53,16 @@
                 <TextView
                     style="@style/MyTextStyle"
                     android:text="件名"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
                     android:layout_width="120sp"
                     android:layout_height="wrap_content" />
                 <TextView
                     style="@style/MyTextStyle"
                     android:text=" : "
-                    android:textAppearance="?android:attr/textAppearanceLarge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <TextView
                     style="@style/MyTextStyle"
                     android:text=""
-                    android:textAppearance="?android:attr/textAppearanceLarge"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/txtSubject"
@@ -89,7 +83,6 @@
                 <TextView
                     style="@style/MyTextStyle"
                     android:text=""
-                    android:textAppearance="?android:attr/textAppearanceLarge"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/txtBody" />

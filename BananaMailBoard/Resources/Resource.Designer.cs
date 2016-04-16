@@ -31,6 +31,9 @@ namespace BananaMailBoard
 		public partial class Attribute
 		{
 			
+			// aapt resource value: 0x7f010000
+			public const int myButtonStyle = 2130771968;
+			
 			static Attribute()
 			{
 				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
@@ -153,6 +156,9 @@ namespace BananaMailBoard
 		
 		public partial class Style
 		{
+			
+			// aapt resource value: 0x7f070002
+			public const int MyApplicationStyle = 2131165186;
 			
 			// aapt resource value: 0x7f070001
 			public const int MyButtonStyle = 2131165185;
