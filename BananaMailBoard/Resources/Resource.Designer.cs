@@ -60,29 +60,32 @@ namespace BananaMailBoard
 		public partial class Id
 		{
 			
-			// aapt resource value: 0x7f070002
-			public const int Separator1 = 2131165186;
+			// aapt resource value: 0x7f080003
+			public const int Separator1 = 2131230723;
 			
-			// aapt resource value: 0x7f070004
-			public const int Separator2 = 2131165188;
+			// aapt resource value: 0x7f080005
+			public const int Separator2 = 2131230725;
 			
-			// aapt resource value: 0x7f070006
-			public const int buttonsLayout = 2131165190;
+			// aapt resource value: 0x7f080007
+			public const int buttonsLayout = 2131230727;
 			
-			// aapt resource value: 0x7f070000
-			public const int fragment1 = 2131165184;
+			// aapt resource value: 0x7f080000
+			public const int fragment1 = 2131230720;
 			
-			// aapt resource value: 0x7f070007
-			public const int textView1 = 2131165191;
+			// aapt resource value: 0x7f080001
+			public const int rootLayout = 2131230721;
 			
-			// aapt resource value: 0x7f070005
-			public const int txtBody = 2131165189;
+			// aapt resource value: 0x7f080008
+			public const int textView1 = 2131230728;
 			
-			// aapt resource value: 0x7f070001
-			public const int txtFromName = 2131165185;
+			// aapt resource value: 0x7f080006
+			public const int txtBody = 2131230726;
 			
-			// aapt resource value: 0x7f070003
-			public const int txtSubject = 2131165187;
+			// aapt resource value: 0x7f080002
+			public const int txtFromName = 2131230722;
+			
+			// aapt resource value: 0x7f080004
+			public const int txtSubject = 2131230724;
 			
 			static Id()
 			{
@@ -135,11 +138,8 @@ namespace BananaMailBoard
 		public partial class String
 		{
 			
-			// aapt resource value: 0x7f060001
-			public const int ApplicationName = 2131099649;
-			
 			// aapt resource value: 0x7f060000
-			public const int Hello = 2131099648;
+			public const int ApplicationName = 2131099648;
 			
 			static String()
 			{
@@ -147,6 +147,25 @@ namespace BananaMailBoard
 			}
 			
 			private String()
+			{
+			}
+		}
+		
+		public partial class Style
+		{
+			
+			// aapt resource value: 0x7f070001
+			public const int MyButtonStyle = 2131165185;
+			
+			// aapt resource value: 0x7f070000
+			public const int MyTextStyle = 2131165184;
+			
+			static Style()
+			{
+				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
+			}
+			
+			private Style()
 			{
 			}
 		}

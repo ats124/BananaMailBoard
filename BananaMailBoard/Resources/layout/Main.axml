@@ -7,6 +7,7 @@
     android:minWidth="25px"
     android:minHeight="25px">
     <TextView
+        style="@style/MyTextStyle"
         android:text="メール受信待機中"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="wrap_content"

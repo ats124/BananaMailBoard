@@ -86,6 +86,7 @@
     <AndroidResource Include="Resources\layout\Main.axml" />
   </ItemGroup>
   <ItemGroup>
+    <AndroidResource Include="Resources\raw\sound.mp3" />
     <AndroidResource Include="Resources\values\Strings.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +96,8 @@
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\raw\sound.mp3" />
+    <AndroidResource Include="Resources\values\Styles.xml" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <AndroidResource Include="Resources\xml\MailPreferencse.xml">
       <SubType>Designer</SubType>

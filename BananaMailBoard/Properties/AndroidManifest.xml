@@ -6,5 +6,5 @@
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-	<application android:label="BananaMailBoard"></application>
+	<application android:label="メール de 伝言板 (仮)"></application>
 </manifest>

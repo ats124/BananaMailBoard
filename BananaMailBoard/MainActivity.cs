@@ -11,7 +11,7 @@ using Android.OS;
 
 namespace BananaMailBoard
 {
-    [Activity(Label = "BananaMailBoard", MainLauncher = true, Icon = "@drawable/icon", LaunchMode = LaunchMode.SingleInstance, 
+    [Activity(MainLauncher = true, Icon = "@drawable/icon", LaunchMode = LaunchMode.SingleInstance, 
         ScreenOrientation = ScreenOrientation.Landscape, ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.KeyboardHidden | ConfigChanges.ScreenSize)]
     public class MainActivity : Activity
     {

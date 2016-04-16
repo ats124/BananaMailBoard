@@ -2,58 +2,104 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    android:id="@+id/rootLayout">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1">
-        <TextView
-            android:text="From"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_height="match_parent"
+        android:background="?android:colorBackground">
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:id="@+id/txtFromName" />
-        <View
-            android:id="@+id/Separator1"
-            android:layout_width="wrap_content"
-            android:background="#DDFFFFFF"
-            android:layout_height="1dp"
-            android:layout_marginTop="3dp"
-            android:layout_marginBottom="3dp" />
-        <TextView
-            android:text="Subject"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/txtSubject"
-            android:singleLine="true"
-            android:ellipsize="end" />
-        <View
-            android:id="@+id/Separator2"
-            android:layout_width="wrap_content"
-            android:background="#DDFFFFFF"
-            android:layout_height="1dp"
-            android:layout_marginTop="3dp"
-            android:layout_marginBottom="3dp" />
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-            <TextView
-                android:text="Body"
-                android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_weight="1"
+            android:padding="5dp">
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    style="@style/MyTextStyle"
+                    android:text="差出人"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_width="120sp"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    style="@style/MyTextStyle"
+                    android:text=" : "
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    style="@style/MyTextStyle"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:id="@+id/txtFromName" />
+            </LinearLayout>
+            <View
+                android:id="@+id/Separator1"
+                android:layout_width="wrap_content"
+                android:background="#DDFFFFFF"
+                android:layout_height="1dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="5dp" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    style="@style/MyTextStyle"
+                    android:text="件名"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_width="120sp"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    style="@style/MyTextStyle"
+                    android:text=" : "
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    style="@style/MyTextStyle"
+                    android:text=""
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/txtSubject"
+                    android:singleLine="true"
+                    android:ellipsize="end" />
+            </LinearLayout>
+            <View
+                android:id="@+id/Separator2"
+                android:layout_width="wrap_content"
+                android:background="#DDFFFFFF"
+                android:layout_height="1dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp" />
+            <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/txtBody" />
-        </ScrollView>
+                android:layout_weight="1">
+                <TextView
+                    style="@style/MyTextStyle"
+                    android:text=""
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/txtBody" />
+            </ScrollView>
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/buttonsLayout" />
     </LinearLayout>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:id="@+id/buttonsLayout" />
 </LinearLayout>

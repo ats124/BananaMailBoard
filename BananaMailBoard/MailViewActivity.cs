@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Net.Mail;
 using System.Net;
+using System.Timers;
 
 using Android.OS;
 using Android.Views;
@@ -13,6 +14,7 @@ using Android.App;
 using Android.Preferences;
 using Android.Content;
 using Android.Content.PM;
+using Android.Graphics;
 
 using SQLite;
 
@@ -25,9 +27,12 @@ namespace BananaMailBoard
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.KeyboardHidden | ConfigChanges.ScreenSize)]
     public class MailViewActivity : Activity
     {
-        private SoundPool spMessageAlertTone = null;
+        private bool ringing = false;
+        private bool flickOn = false;
+
+        private SoundPool spRingingTone = null;
         private int soundId = 0;
-        private bool soundStop = false;
+        private Timer flickerTimer = null;
 
         static MailViewActivity()
         {
@@ -78,7 +83,7 @@ namespace BananaMailBoard
             var buttonNames = intent.GetStringArrayExtra(Constants.BUNDLE_MAIL_REPLY_BUTTONS);
             foreach (var button in buttonNames.DefaultIfEmpty("OK").Select(btnName => new Button(this) { Text = btnName }))
             {
-                button.Click += Button_Click;
+                button.Click += ReplyButton_Click;
                 buttonsLayout.AddView(button);
             }
             ((MainApplication)Application).LastViewMessageUid = intent.GetStringExtra(Constants.BUNDLE_MAIL_MESSAGE_UID);
@@ -87,73 +92,125 @@ namespace BananaMailBoard
         protected override void OnResume()
         {
             base.OnResume();
-            if (!soundStop)
+            if (!ringing)
             {
-                PlayMessageAlertTone();
+                StartMessageReciveRinging();
             }
         }
 
         protected override void OnPause()
         {
             base.OnPause();
-            StopMessageAlertTone();
+            StopMessageReceiveRinging();
         }
 
-        private async void Button_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 返信ボタンクリック時処理。
+        /// </summary>
+        private async void ReplyButton_Click(object sender, EventArgs e)
         {
-            // 返信中プログレスダイアログ表示
-            var progressDialog = new ProgressDialog(this);
-            progressDialog.SetTitle("返信メール送信中");
-            progressDialog.SetMessage("しばらくお待ちください。");
-            progressDialog.SetCancelable(false);
-            progressDialog.SetProgressStyle(ProgressDialogStyle.Spinner);
-            progressDialog.Show();
-
-            // 返信
-            var replyResult = await SendReply(((Button)sender).Text);
-
-            // 返信中プログレスダイアログ閉じる
-            progressDialog.Dismiss();
-
-            if (replyResult)
+            try
             {
-                // 返信に成功した場合は待受け画面へ遷移
-                Finish();
-                StartActivity(typeof(MainActivity));
+                // 返信中プログレスダイアログ表示
+                var progressDialog = new ProgressDialog(this);
+                progressDialog.SetTitle("返信メール送信中");
+                progressDialog.SetMessage("しばらくお待ちください。");
+                progressDialog.SetCancelable(false);
+                progressDialog.SetProgressStyle(ProgressDialogStyle.Spinner);
+                progressDialog.Show();
+
+                // 返信
+                var replyResult = await SendReply(((Button)sender).Text);
+
+                // 返信中プログレスダイアログ閉じる
+                progressDialog.Dismiss();
+
+                if (replyResult)
+                {
+                    // 返信に成功した場合は待受け画面へ遷移
+                    Finish();
+                    StartActivity(typeof(MainActivity));
+                }
+                else
+                {
+                    // 返信に失敗した場合はエラーダイアログ表示
+                    var alertDlgBuilder = new AlertDialog.Builder(this);
+                    alertDlgBuilder.SetTitle("返信送信エラー");
+                    alertDlgBuilder.SetMessage("返信送信中にエラーが発生しました。");
+                    alertDlgBuilder.SetPositiveButton("OK", (sender2, e2) => { });
+                    alertDlgBuilder.Create().Show();
+                }
+
             }
-            else
+            catch (Exception ex)
             {
-                // 返信に失敗した場合はエラーダイアログ表示
-                var alertDlgBuilder = new AlertDialog.Builder(this);
-                alertDlgBuilder.SetTitle("返信送信エラー");
-                alertDlgBuilder.SetMessage("返信送信中にエラーが発生しました。");
-                alertDlgBuilder.SetPositiveButton("OK", (sender2, e2) => { });
-                alertDlgBuilder.Create().Show();
-            }
-        }
-
-        private void PlayMessageAlertTone()
-        {
-            spMessageAlertTone = new SoundPool(1, Stream.Music, 0);
-            soundId = spMessageAlertTone.Load(this, Resource.Raw.sound, 1);
-            spMessageAlertTone.LoadComplete += (sender, e) =>
-            {
-                if (spMessageAlertTone != null) spMessageAlertTone.Play(soundId, 1, 1, 1, -1, 1);
-            };
-        }
-
-        private void StopMessageAlertTone()
-        {
-            if (spMessageAlertTone != null)
-            {
-                spMessageAlertTone.Stop(soundId);
-                spMessageAlertTone.Unload(soundId);
-                spMessageAlertTone.Dispose();
-                spMessageAlertTone = null;
+                LogHelper.Error(ex, "Reply Button Click Error");
             }
         }
 
-        private Task<bool> SendReply(string replyMessage)
+        /// <summary>
+        /// メール受信鳴動音とフリッカを開始する。
+        /// </summary>
+        private void StartMessageReciveRinging()
+        {
+            if (spRingingTone == null)
+            {
+                spRingingTone = new SoundPool(1, Stream.Music, 0);
+                soundId = spRingingTone.Load(this, Resource.Raw.sound, 1);
+                spRingingTone.LoadComplete += (sender, e) =>
+                {
+                    if (spRingingTone != null) spRingingTone.Play(soundId, 1, 1, 1, -1, 1);
+                };
+            }
+
+            if (flickerTimer == null)
+            {
+                flickerTimer = new Timer(Constants.FLICKER_INTERVAL);
+                flickerTimer.Elapsed += (sender, e) => RunOnUiThread(() =>
+                {
+                    var rootLayout = FindViewById<LinearLayout>(Resource.Id.rootLayout);
+                    flickOn = !flickOn;
+                    if (flickOn)
+                    {
+                        rootLayout.SetBackgroundColor(Constants.FLICKER_COLOR);
+                    }
+                    else
+                    {
+                        var attrValue = new Android.Util.TypedValue();
+                        Theme.ResolveAttribute(Android.Resource.Attribute.ColorBackground, attrValue, true);
+                        rootLayout.SetBackgroundColor(Resources.GetColor(attrValue.ResourceId));
+                    }
+                });
+                flickerTimer.Start();
+            }
+        }
+
+        /// <summary>
+        /// メール受信鳴動音とフリッカを停止する。
+        /// </summary>
+        private void StopMessageReceiveRinging()
+        {
+            if (spRingingTone != null)
+            {
+                spRingingTone.Stop(soundId);
+                spRingingTone.Unload(soundId);
+                spRingingTone.Dispose();
+                spRingingTone = null;
+            }
+            if (flickerTimer != null)
+            {
+                flickerTimer.Stop();
+                flickerTimer.Dispose();
+                flickerTimer = null;
+            }
+        }
+
+        /// <summary>
+        /// メール返信処理。
+        /// </summary>
+        /// <param name="replyButtonName">返信ボタン名称。</param>
+        /// <returns>送信成功時はtrue、失敗時はfalse。</returns>
+        private Task<bool> SendReply(string replyButtonName)
         {
             // メール設定取得
             var pref = PreferenceManager.GetDefaultSharedPreferences(this);
@@ -187,7 +244,7 @@ namespace BananaMailBoard
                         message.Subject = "Re:" + mailSubject;
                         message.SubjectEncoding = System.Text.Encoding.UTF8;
                         message.Body =
-                            $"「{replyMessage}」ボタンにより返信されました。\r\n\r\n" +
+                            $"「{replyButtonName}」ボタンにより返信されました。\r\n\r\n" +
                             Regex.Replace(mailBody, "^", "> ", RegexOptions.Multiline);
                         message.BodyEncoding = System.Text.Encoding.UTF8;
                         using (var smtpClient = new SmtpClient())

@@ -13,7 +13,7 @@ using Android.Preferences;
 
 namespace BananaMailBoard
 {
-    [Activity(Label = "MailPreferenceActivity")]
+    [Activity()]
     public class MailPreferenceActivity : PreferenceActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)

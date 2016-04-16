@@ -20,6 +20,8 @@ namespace BananaMailBoard
         public const string BUNDLE_MAIL_REPLY_BUTTONS = "MAIL_REPLY_BUTTONS";
 
         public static readonly TimeSpan DO_MAIL_RECEIVE_INTERVAL = TimeSpan.FromMinutes(1);
+        public static readonly Android.Graphics.Color FLICKER_COLOR = Android.Graphics.Color.Red;
+        public static readonly double FLICKER_INTERVAL = 500;
 
         public static readonly object DB_LOCK = new object(); 
 
