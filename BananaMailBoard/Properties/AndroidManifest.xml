@@ -7,7 +7,5 @@
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 	<uses-permission android:name="android.permission.INTERNET" />
-  <application
-    android:label="@string/ApplicationName"
-    android:theme="@style/MyApplicationStyle" />
+	<application android:label="@string/ApplicationName" />
 </manifest>

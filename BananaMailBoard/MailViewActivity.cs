@@ -82,8 +82,9 @@ namespace BananaMailBoard
             var buttonNames = intent.GetStringArrayExtra(Constants.BUNDLE_MAIL_REPLY_BUTTONS);
             foreach (var button in buttonNames
                 .DefaultIfEmpty("OK")
-                .Select(btnName => new Button(this, null, Resource.Attribute.myButtonStyle) { Text = btnName }))
-            {                
+                .Select(btnName => new Button(this) { Text = btnName }))
+            {
+                button.SetTextSize(Android.Util.ComplexUnitType.Sp, 40);
                 button.Click += ReplyButton_Click;
                 buttonsLayout.AddView(button);
             }
